@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 import boto3
@@ -54,20 +56,17 @@ def test_queries_existem() -> None:
         assert "SELECT *" not in conteudo.upper(), f"SELECT * em {entidade}"
 
 
-def test_staging_parquet() -> dict[str, int]:
-    contagens: dict[str, int] = {}
+def test_staging_parquet() -> None:
     for entidade in ENTIDADES_BATCH:
         path = STAGING_DIR / f"{entidade}.parquet"
         assert path.exists(), f"Staging ausente: {path}"
         df = pd.read_parquet(path)
-        contagens[entidade] = len(df)
         minimo, maximo = VOLUMES_ESPERADOS[entidade]
         assert minimo <= len(df) <= maximo, f"Volume {entidade}: {len(df)}"
         assert COLUNAS_OBRIGATORIAS[entidade].issubset(df.columns)
         if "id_municipio" in df.columns:
             amostra = df["id_municipio"].dropna().astype(str).head(5)
             assert all(len(v) == 7 and v.isdigit() for v in amostra)
-    return contagens
 
 
 def test_dq_bronze_local() -> None:
@@ -78,17 +77,40 @@ def test_dq_bronze_local() -> None:
         checar_entidade_pandas(df_bronze, entidade, "bronze")
 
 
-def test_s3_bronze() -> dict[str, int]:
+def _s3_client():
     load_dotenv(ROOT / ".env")
     settings = get_settings()
-    s3 = boto3.client(
+    return boto3.client(
         "s3",
         region_name=settings.aws_default_region,
         aws_access_key_id=settings.aws_access_key_id,
         aws_secret_access_key=settings.aws_secret_access_key,
-    )
-    bucket = settings.bucket_bronze
-    resultados: dict[str, int] = {}
+    ), settings.bucket_bronze
+
+
+def _glue_client():
+    load_dotenv(ROOT / ".env")
+    settings = get_settings()
+    return boto3.client("glue", region_name=settings.aws_default_region)
+
+
+def _contar_linhas_s3(s3, bucket: str, prefix: str) -> int:
+    total = 0
+    paginator = s3.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        for obj in page.get("Contents", []):
+            if not obj["Key"].endswith(".parquet"):
+                continue
+            with tempfile.NamedTemporaryFile(suffix=".parquet", delete=False) as tmp:
+                path = tmp.name
+            s3.download_file(bucket, obj["Key"], path)
+            total += len(pd.read_parquet(path))
+            os.remove(path)
+    return total
+
+
+def test_s3_bronze() -> None:
+    s3, bucket = _s3_client()
 
     for entidade in ENTIDADES_BATCH:
         prefix = f"bronze/batch/{entidade}/"
@@ -99,9 +121,10 @@ def test_s3_bronze() -> dict[str, int]:
         parquet_keys = [k for k in keys if k.endswith(".parquet")]
         assert parquet_keys, f"Sem parquet bronze para {entidade}"
         assert any("/ano=" in k and "/mes=" in k and "/dia=" in k for k in parquet_keys)
-        resultados[entidade] = len(parquet_keys)
 
-    return resultados
+        staging_n = len(pd.read_parquet(STAGING_DIR / f"{entidade}.parquet"))
+        s3_n = _contar_linhas_s3(s3, bucket, prefix)
+        assert staging_n == s3_n, f"{entidade}: staging={staging_n} s3={s3_n}"
 
 
 def test_idempotencia_extracao() -> None:
@@ -113,29 +136,73 @@ def test_idempotencia_extracao() -> None:
     path.unlink(missing_ok=True)
 
 
+def test_glue_catalog_por_entidade() -> None:
+    glue = _glue_client()
+    tables = {t["Name"] for t in glue.get_tables(DatabaseName="datalake_alfabetizacao")["TableList"]}
+    assert tables == set(ENTIDADES_BATCH), f"Tabelas Glue inesperadas: {sorted(tables)}"
+    assert "batch" not in tables
+
+    crawlers: list[str] = []
+    token = None
+    while True:
+        kwargs = {"NextToken": token} if token else {}
+        resp = glue.get_crawlers(**kwargs)
+        crawlers.extend(c["Name"] for c in resp["Crawlers"])
+        token = resp.get("NextToken")
+        if not token:
+            break
+
+    assert "crawler-bronze-batch" not in crawlers
+    for entidade in ENTIDADES_BATCH:
+        nome = f"crawler-bronze-{entidade}"
+        assert nome in crawlers, f"Crawler ausente: {nome}"
+
+    parts_uf = glue.get_partitions(DatabaseName="datalake_alfabetizacao", TableName="uf")["Partitions"]
+    assert len(parts_uf) >= 1
+    parts_alunos = glue.get_partitions(DatabaseName="datalake_alfabetizacao", TableName="alunos")["Partitions"]
+    assert len(parts_alunos) == 2
+
+
+def test_metadados_s3_municipio() -> None:
+    s3, bucket = _s3_client()
+    key = "bronze/batch/municipio/ano=2026/mes=07/dia=12/part-00000.parquet"
+    with tempfile.NamedTemporaryFile(suffix=".parquet", delete=False) as tmp:
+        path = tmp.name
+    s3.download_file(bucket, key, path)
+    df = pd.read_parquet(path)
+    os.remove(path)
+    assert METADADOS_BRONZE.issubset(df.columns)
+    assert df["_source_entity"].iloc[0] == "municipio"
+    assert df["_job_name"].iloc[0] == "etl-bronze-batch"
+
+
 def main() -> None:
     print("==> Teste 1: queries SQL")
     test_queries_existem()
     print("OK")
 
     print("==> Teste 2: staging parquet")
-    contagens = test_staging_parquet()
-    for e, n in contagens.items():
-        print(f"  {e}: {n} linhas")
+    test_staging_parquet()
     print("OK")
 
     print("==> Teste 3: DQ bronze local")
     test_dq_bronze_local()
     print("OK")
 
-    print("==> Teste 4: S3 bronze")
-    s3_counts = test_s3_bronze()
-    for e, n in s3_counts.items():
-        print(f"  {e}: {n} arquivos parquet")
+    print("==> Teste 4: S3 bronze (volumes)")
+    test_s3_bronze()
     print("OK")
 
     print("==> Teste 5: idempotencia extracao UF")
     test_idempotencia_extracao()
+    print("OK")
+
+    print("==> Teste 6: Glue catalog por entidade")
+    test_glue_catalog_por_entidade()
+    print("OK")
+
+    print("==> Teste 7: metadados S3 municipio")
+    test_metadados_s3_municipio()
     print("OK")
 
     print("\nTODOS OS TESTES PASSARAM")
