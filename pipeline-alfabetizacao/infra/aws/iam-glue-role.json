@@ -1,0 +1,48 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3MedalhaoAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${BUCKET_BRONZE}",
+        "arn:aws:s3:::${BUCKET_BRONZE}/*",
+        "arn:aws:s3:::${BUCKET_SILVER}",
+        "arn:aws:s3:::${BUCKET_SILVER}/*",
+        "arn:aws:s3:::${BUCKET_GOLD}",
+        "arn:aws:s3:::${BUCKET_GOLD}/*"
+      ]
+    },
+    {
+      "Sid": "GlueCatalogAccess",
+      "Effect": "Allow",
+      "Action": [
+        "glue:*"
+      ],
+      "Resource": [
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:catalog",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:database/*",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/*",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:crawler/*",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:job/*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:${AWS_REGION}:${AWS_ACCOUNT_ID}:log-group:/aws-glue/*"
+    }
+  ]
+}
