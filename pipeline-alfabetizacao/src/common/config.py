@@ -46,9 +46,9 @@ class Settings:
     aws_default_region: str = field(
         default_factory=lambda: os.getenv("AWS_DEFAULT_REGION", "us-east-1")
     )
-    bucket_sor: str = field(default_factory=lambda: os.getenv("BUCKET_SOR", ""))
-    bucket_sot: str = field(default_factory=lambda: os.getenv("BUCKET_SOT", ""))
-    bucket_spec: str = field(default_factory=lambda: os.getenv("BUCKET_SPEC", ""))
+    bucket_bronze: str = field(default_factory=lambda: os.getenv("BUCKET_BRONZE", ""))
+    bucket_silver: str = field(default_factory=lambda: os.getenv("BUCKET_SILVER", ""))
+    bucket_gold: str = field(default_factory=lambda: os.getenv("BUCKET_GOLD", ""))
     kafka_bootstrap_servers: str = field(
         default_factory=lambda: os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
     )
@@ -56,24 +56,24 @@ class Settings:
 
     def bronze_batch_path(self, entidade: str, ano: str, mes: str, dia: str) -> str:
         return (
-            f"s3://{self.bucket_sor}/bronze/batch/{entidade}/"
+            f"s3://{self.bucket_bronze}/bronze/batch/{entidade}/"
             f"ano={ano}/mes={mes}/dia={dia}/"
         )
 
     def bronze_streaming_path(self, entidade: str, ano: str, mes: str, dia: str) -> str:
         return (
-            f"s3://{self.bucket_sor}/bronze/streaming/{entidade}/"
+            f"s3://{self.bucket_bronze}/bronze/streaming/{entidade}/"
             f"ano={ano}/mes={mes}/dia={dia}/"
         )
 
     def silver_path(self, entidade: str) -> str:
-        return f"s3://{self.bucket_sot}/silver/{entidade}/"
+        return f"s3://{self.bucket_silver}/silver/{entidade}/"
 
     def gold_path(self, visao: str) -> str:
-        return f"s3://{self.bucket_spec}/gold/{visao}/"
+        return f"s3://{self.bucket_gold}/gold/{visao}/"
 
     def quarentena_path(self, entidade: str) -> str:
-        return f"s3://{self.bucket_sot}/quarentena/{entidade}/"
+        return f"s3://{self.bucket_silver}/quarentena/{entidade}/"
 
 
 @lru_cache(maxsize=1)

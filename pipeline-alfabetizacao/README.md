@@ -67,9 +67,9 @@ copy .env.example .env        # Preencher credenciais
 | `AWS_ACCESS_KEY_ID` | Chave de acesso AWS |
 | `AWS_SECRET_ACCESS_KEY` | Chave secreta AWS |
 | `AWS_DEFAULT_REGION` | Região AWS (ex.: `us-east-1`) |
-| `BUCKET_SOR` | Bucket S3 — camada Bronze |
-| `BUCKET_SOT` | Bucket S3 — camada Silver |
-| `BUCKET_SPEC` | Bucket S3 — camada Gold |
+| `BUCKET_BRONZE` | Bucket S3 — camada Bronze |
+| `BUCKET_SILVER` | Bucket S3 — camada Silver |
+| `BUCKET_GOLD` | Bucket S3 — camada Gold |
 | `KAFKA_BOOTSTRAP_SERVERS` | Endereço do broker Kafka |
 
 ## Referências

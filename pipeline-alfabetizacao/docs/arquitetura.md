@@ -14,9 +14,9 @@ A arquitetura adotada é **híbrida**, combinando ingestão **batch** para dados
 
 | Camada | Bucket | Finalidade |
 |--------|--------|------------|
-| Bronze (SOR) | `BUCKET_SOR` | Preservação dos dados brutos ingeridos |
-| Silver (SOT) | `BUCKET_SOT` | Dados tratados, validados e integrados |
-| Gold (SPEC) | `BUCKET_SPEC` | Dados analíticos prontos para consumo |
+| Bronze | `BUCKET_BRONZE` | Preservação dos dados brutos ingeridos |
+| Silver | `BUCKET_SILVER` | Dados tratados, validados e integrados |
+| Gold | `BUCKET_GOLD` | Dados analíticos prontos para consumo |
 
 ## 3. Diagrama da pipeline
 
@@ -80,11 +80,11 @@ A ingestão streaming simula a chegada de eventos educacionais em tempo quase re
 Os dados são organizados em paths particionados por data (`ano`, `mes`, `dia`), conforme a estrutura abaixo:
 
 ```
-s3://{BUCKET_SOR}/bronze/batch/{entidade}/ano={ano}/mes={mes}/dia={dia}/
-s3://{BUCKET_SOR}/bronze/streaming/{entidade}/ano={ano}/mes={mes}/dia={dia}/
-s3://{BUCKET_SOT}/silver/{entidade}/ano={ano}/mes={mes}/dia={dia}/
-s3://{BUCKET_SOT}/quarentena/{entidade}/ano={ano}/mes={mes}/dia={dia}/
-s3://{BUCKET_SPEC}/gold/{visao}/ano={ano}/mes={mes}/dia={dia}/
+s3://{BUCKET_BRONZE}/bronze/batch/{entidade}/ano={ano}/mes={mes}/dia={dia}/
+s3://{BUCKET_BRONZE}/bronze/streaming/{entidade}/ano={ano}/mes={mes}/dia={dia}/
+s3://{BUCKET_SILVER}/silver/{entidade}/ano={ano}/mes={mes}/dia={dia}/
+s3://{BUCKET_SILVER}/quarentena/{entidade}/ano={ano}/mes={mes}/dia={dia}/
+s3://{BUCKET_GOLD}/gold/{visao}/ano={ano}/mes={mes}/dia={dia}/
 ```
 
 O formato de armazenamento adotado é **Apache Parquet** com compressão **SNAPPY**, visando redução de custos de armazenamento e otimização de consultas analíticas.

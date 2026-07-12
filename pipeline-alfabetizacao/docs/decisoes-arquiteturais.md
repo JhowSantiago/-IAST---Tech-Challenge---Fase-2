@@ -62,7 +62,7 @@ A pipeline implementa validações automatizadas em cada camada, verificando:
 - **Consistência** — coerência entre atributos relacionados;
 - **Unicidade** — ausência de duplicatas indevidas.
 
-Registros que não atendem aos critérios de qualidade são direcionados à área de **quarentena** (`s3://{BUCKET_SOT}/quarentena/`), sem interrupção do fluxo principal de processamento. Falhas em verificações críticas interrompem o job correspondente.
+Registros que não atendem aos critérios de qualidade são direcionados à área de **quarentena** (`s3://{BUCKET_SILVER}/quarentena/`), sem interrupção do fluxo principal de processamento. Falhas em verificações críticas interrompem o job correspondente.
 
 ## 8. Otimização de custos (FinOps)
 

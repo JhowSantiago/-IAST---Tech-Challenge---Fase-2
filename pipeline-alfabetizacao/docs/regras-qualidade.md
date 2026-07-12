@@ -71,7 +71,7 @@ flowchart TD
     D -->|Não| F[Registro segue para próxima camada]
 ```
 
-Registros em quarentena são persistidos em `s3://{BUCKET_SOT}/quarentena/{entidade}/` com motivo documentado, sem interromper o processamento de registros válidos.
+Registros em quarentena são persistidos em `s3://{BUCKET_SILVER}/quarentena/{entidade}/` com motivo documentado, sem interromper o processamento de registros válidos.
 
 ## 6. Integração nos jobs
 
