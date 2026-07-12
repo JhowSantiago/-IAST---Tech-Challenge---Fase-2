@@ -10,8 +10,8 @@ Este documento define as entidades de dados, suas fontes, chaves de relacionamen
 |----------------|-------------|--------|------|----------------|
 | UF (diretório) | `br_bd_diretorios_brasil.uf` | 27 | — | `sigla` → padronizada como `sigla_uf` |
 | Município (diretório) | `br_bd_diretorios_brasil.municipio` | 5.571 | — | `id_municipio` |
-| Meta — Brasil | `br_inep_avaliacao_alfabetizacao.meta_alfabetizacao_brasil` | 3 | 2023–2025 | `ano`, `rede` |
-| Meta — UF | `br_inep_avaliacao_alfabetizacao.meta_alfabetizacao_uf` | 81 | 2023–2025 | `ano`, `sigla_uf`, `rede` |
+| Meta — Brasil | `br_inep_avaliacao_alfabetizacao.meta_alfabetizacao_brasil` | 3 | 2023–2024 | `ano`, `rede` |
+| Meta — UF | `br_inep_avaliacao_alfabetizacao.meta_alfabetizacao_uf` | 81 | 2023–2024 | `ano`, `sigla_uf`, `rede` |
 | Meta — Município | `br_inep_avaliacao_alfabetizacao.meta_alfabetizacao_municipio` | 10.704 | 2023–2024 | `ano`, `id_municipio`, `rede` |
 | Alunos | `br_inep_avaliacao_alfabetizacao.alunos` | 3.867.999 | 2023–2024 | `id_aluno` |
 
@@ -21,6 +21,21 @@ Este documento define as entidades de dados, suas fontes, chaves de relacionamen
 |----------|-------------|------------|
 | Indicador — UF | `br_inep_avaliacao_alfabetizacao.uf` | Taxa e distribuição por nível na UF |
 | Indicador — Município | `br_inep_avaliacao_alfabetizacao.municipio` | Taxa e distribuição por nível no município |
+
+### 2.2 Cobertura temporal
+
+Conforme metadados oficiais da [Base dos Dados](https://basedosdados.org/), o dataset `br_inep_avaliacao_alfabetizacao` possui **cobertura temporal gratuita de 2023 a 2024** em todas as tabelas de avaliação e metas.
+
+| Conceito | Significado |
+|----------|-------------|
+| Coluna `ano` | Ano da **avaliação** (valores: 2023 ou 2024) |
+| Colunas `meta_alfabetizacao_2024` … `2030` | **Metas futuras** definidas no compromisso — não são anos de observação |
+| Período de análise da pipeline | **2023 e 2024** exclusivamente |
+| Diretórios territoriais | Tabelas estáticas, sem coluna `ano` |
+
+**Regra de extração:** `WHERE ano IN (2023, 2024)` em todas as tabelas do INEP. Em `alunos`, uma carga por ano.
+
+**Custo:** a badge *GRÁTIS* no portal indica dados disponíveis nesse intervalo; o processamento é contabilizado no projeto GCP (cota gratuita de 1 TB/mês no BigQuery).
 
 ## 3. Schemas validados
 
