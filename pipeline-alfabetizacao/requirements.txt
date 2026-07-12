@@ -1,6 +1,8 @@
 basedosdados>=2.0
 pandas>=2.0
+pyarrow>=14.0
 pyspark>=3.3
 kafka-python-ng
 python-dotenv
 requests
+boto3>=1.28

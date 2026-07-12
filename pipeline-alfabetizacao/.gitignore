@@ -8,6 +8,7 @@ credentials.json
 *.egg-info/
 .pytest_cache/
 tests/validation/samples/*.json
+data/staging/
 
 # Artefatos locais de IDE
 .idea/
