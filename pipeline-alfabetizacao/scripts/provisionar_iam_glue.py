@@ -14,6 +14,13 @@ ROOT = Path(__file__).resolve().parent.parent
 ROLE_NAME = "glue-alfabetizacao-role"
 POLICY_NAME = "glue-alfabetizacao-s3-glue-policy"
 DATABASE_NAME = "datalake_alfabetizacao"
+CRAWLER_LEGADO_BATCH = "crawler-bronze-batch"
+TABELA_LEGADA_BATCH = "batch"
+
+import sys
+
+sys.path.insert(0, str(ROOT))
+from src.common.config import ENTIDADES_BATCH  # noqa: E402
 
 
 def main() -> None:
@@ -79,9 +86,25 @@ def main() -> None:
         print(f"Database {DATABASE_NAME} criado")
 
     crawlers = {
-        "crawler-bronze-batch": f"s3://{bronze}/bronze/batch/",
-        "crawler-bronze-streaming": f"s3://{bronze}/bronze/streaming/",
+        f"crawler-bronze-{entidade}": f"s3://{bronze}/bronze/batch/{entidade}/"
+        for entidade in ENTIDADES_BATCH
     }
+    crawlers["crawler-bronze-streaming"] = f"s3://{bronze}/bronze/streaming/"
+
+    try:
+        glue.delete_crawler(Name=CRAWLER_LEGADO_BATCH)
+        print(f"Crawler legado {CRAWLER_LEGADO_BATCH} removido")
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] != "EntityNotFoundException":
+            raise
+
+    try:
+        glue.delete_table(DatabaseName=DATABASE_NAME, Name=TABELA_LEGADA_BATCH)
+        print(f"Tabela legada {TABELA_LEGADA_BATCH} removida")
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] != "EntityNotFoundException":
+            raise
+
     for name, path in crawlers.items():
         try:
             glue.get_crawler(Name=name)

@@ -43,9 +43,7 @@ TBLPROPERTIES ('parquet.compression'='SNAPPY');
 
 -- =============================================================================
 -- Meta — Brasil
--- Observação: a coluna de avaliação foi nomeada ano_avaliacao para não conflitar
--- com a partição ano (data de ingestão). Para tabelas com ano de negócio, recomenda-se
--- o crawler bronze após a primeira carga.
+-- Partição ano = ano de avaliação INEP (2023, 2024); mes/dia = data da ingestão.
 -- =============================================================================
 CREATE EXTERNAL TABLE IF NOT EXISTS datalake_alfabetizacao.bronze_meta_brasil (
     ano_avaliacao INT,

@@ -61,9 +61,21 @@ create_crawler() {
   echo "Crawler ${crawler_name} criado."
 }
 
+ENTIDADES_BATCH=(uf municipio meta_brasil meta_uf meta_municipio alunos)
+
 create_database
-create_crawler "crawler-bronze-batch" "s3://${BUCKET_BRONZE}/bronze/batch/"
+
+for entidade in "${ENTIDADES_BATCH[@]}"; do
+  create_crawler "crawler-bronze-${entidade}" "s3://${BUCKET_BRONZE}/bronze/batch/${entidade}/"
+done
+
 create_crawler "crawler-bronze-streaming" "s3://${BUCKET_BRONZE}/bronze/streaming/"
+
+# Remove crawler legado que inferia tabela única "batch" na raiz batch/
+if aws glue get-crawler --name "crawler-bronze-batch" --region "$REGION" >/dev/null 2>&1; then
+  aws glue delete-crawler --name "crawler-bronze-batch" --region "$REGION"
+  echo "Crawler legado crawler-bronze-batch removido."
+fi
 
 echo "Glue Data Catalog configurado."
 aws glue get-database --name "$DATABASE_NAME" --region "$REGION" --query Database.Name --output text
