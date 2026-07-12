@@ -1,0 +1,15 @@
+SELECT
+    ano,
+    sigla_uf,
+    rede,
+    taxa_alfabetizacao,
+    meta_alfabetizacao_2024,
+    meta_alfabetizacao_2025,
+    meta_alfabetizacao_2026,
+    meta_alfabetizacao_2027,
+    meta_alfabetizacao_2028,
+    meta_alfabetizacao_2029,
+    meta_alfabetizacao_2030,
+    percentual_participacao
+FROM `basedosdados.br_inep_avaliacao_alfabetizacao.meta_alfabetizacao_uf`
+WHERE ano IN (2023, 2024)
