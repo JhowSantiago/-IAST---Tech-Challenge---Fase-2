@@ -8,3 +8,7 @@ credentials.json
 *.egg-info/
 .pytest_cache/
 tests/validation/samples/*.json
+
+# Artefatos locais de IDE
+.idea/
+.vscode/

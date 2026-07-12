@@ -1,18 +1,34 @@
-# Buckets S3 — Arquitetura Medalhão
+# Armazenamento S3 — Arquitetura Medalhão
 
-Documentação da camada de armazenamento da pipeline ICA (Tech Challenge Fase 2).
+## 1. Introdução
 
-## Nomenclatura
+Este documento descreve a organização do armazenamento em nuvem adotado na pipeline do Indicador Criança Alfabetizada (ICA). A estrutura segue o padrão **Medalhão**, com separação física em três buckets Amazon S3, conforme orientação da disciplina de ETL Pipelines (Aula 3.3).
 
-| Camada | Variável `.env` | Bucket (exemplo) | Finalidade |
-|--------|-----------------|------------------|------------|
-| Bronze | `BUCKET_BRONZE` | `335596040535--tech-challenge-fase-2-bronze` | Dados brutos (batch + streaming) |
-| Silver | `BUCKET_SILVER` | `335596040535--tech-challenge-fase-2-silver` | Dados tratados e quarentena |
-| Gold | `BUCKET_GOLD` | `335596040535--tech-challenge-fase-2-gold` | Visões analíticas |
+A separação por camada permite aplicar políticas distintas de acesso, custo e retenção, além de facilitar a auditoria dos dados em cada estágio do processamento.
 
-> No `.env`, informe **somente o nome do bucket** — sem `s3://` e sem pastas. O `config.py` monta os paths completos.
+## 2. Buckets e variáveis de ambiente
 
-## Estrutura de paths
+| Camada | Variável | Finalidade |
+|--------|----------|------------|
+| Bronze | `BUCKET_BRONZE` | Persistência dos dados brutos (batch e streaming) |
+| Silver | `BUCKET_SILVER` | Dados tratados, validados e área de quarentena |
+| Gold | `BUCKET_GOLD` | Visões analíticas para consumo |
+
+As variáveis devem conter **apenas o nome do bucket**, sem prefixo `s3://` e sem barras de diretório. Os caminhos completos são montados programaticamente em `src/common/config.py`.
+
+**Exemplo de configuração (conta de desenvolvimento):**
+
+| Camada | Bucket |
+|--------|--------|
+| Bronze | `335596040535--tech-challenge-fase-2-bronze` |
+| Silver | `335596040535--tech-challenge-fase-2-silver` |
+| Gold | `335596040535--tech-challenge-fase-2-gold` |
+
+Região utilizada: `us-east-2` (Ohio).
+
+## 3. Estrutura de diretórios
+
+Os objetos são organizados com particionamento por data de ingestão (`ano`, `mes`, `dia`):
 
 ```
 s3://{BUCKET_BRONZE}/bronze/batch/{entidade}/ano={ano}/mes={mes}/dia={dia}/
@@ -22,69 +38,62 @@ s3://{BUCKET_SILVER}/quarentena/{entidade}/ano={ano}/mes={mes}/dia={dia}/
 s3://{BUCKET_GOLD}/gold/{visao}/ano={ano}/mes={mes}/dia={dia}/
 ```
 
-**Entidades batch:** `uf`, `municipio`, `meta_brasil`, `meta_uf`, `meta_municipio`, `alunos`.
+As seis entidades da ingestão batch são: `uf`, `municipio`, `meta_brasil`, `meta_uf`, `meta_municipio` e `alunos`.
 
-## Provisionamento
+## 4. Provisionamento da estrutura
+
+Após a criação manual dos buckets no console AWS, a estrutura interna pode ser inicializada com:
 
 ```bash
-# Na raiz de pipeline-alfabetizacao/
 bash infra/aws/setup-buckets.sh
 ```
 
-O script:
+Em ambientes Windows, utilizar o script equivalente:
 
-1. Verifica existência dos 3 buckets
-2. Cria arquivos `.keep` nos prefixos medalhão
-3. Aplica tags FinOps (`project`, `environment`, `finops`, `layer`)
+```bash
+python scripts/provisionar_buckets.py
+```
 
-## Tags FinOps
+O procedimento verifica a existência dos buckets, cria marcadores nos prefixos medalhão e aplica as tags de controle de custo.
+
+## 5. Tags de FinOps
+
+Cada bucket recebe as tags abaixo para rastreabilidade de custos no ambiente acadêmico:
 
 | Tag | Valor |
 |-----|-------|
 | `project` | `tech-challenge-fase2` |
 | `environment` | `dev` |
 | `finops` | `tracked` |
-| `layer` | `bronze` \| `silver` \| `gold` |
+| `layer` | `bronze`, `silver` ou `gold` |
 
-## Política de lifecycle (recomendação)
+## 6. Política de ciclo de vida
 
-Para ambiente de desenvolvimento, versionamento permanece **desabilitado** (custo).
+No ambiente de desenvolvimento, o versionamento dos buckets permanece desabilitado para redução de custos.
 
-Em produção, considerar regra de lifecycle no bucket bronze:
+Para um cenário produtivo, recomenda-se avaliar regras de transição dos objetos da camada bronze com mais de 90 dias para o S3 Glacier Instant Retrieval, bem como expiração automática dos registros em quarentena após 30 dias.
 
-- Objetos com mais de **90 dias** → transição para **S3 Glacier Instant Retrieval**
-- Objetos em `quarentena/` com mais de **30 dias** → expiração automática
+## 7. Papel IAM para o AWS Glue
 
-## IAM Role para Glue
+O serviço Glue requer um papel IAM dedicado para leitura e escrita nos buckets medalhão.
 
-| Campo | Valor |
-|-------|-------|
+| Atributo | Valor |
+|----------|-------|
 | Nome | `glue-alfabetizacao-role` |
 | ARN | `arn:aws:iam::335596040535:role/glue-alfabetizacao-role` |
-| Trust principal | `glue.amazonaws.com` |
-| Políticas | `iam-glue-policy.json` + `AWSGlueServiceRole` (managed) |
+| Principal de confiança | `glue.amazonaws.com` |
+| Política inline | `iam-glue-role.json` |
+| Política gerenciada | `AWSGlueServiceRole` |
 
-Criação via script:
+A criação do papel pode ser realizada com:
 
 ```bash
 bash infra/aws/setup-iam-role.sh
 ```
 
-ARN esperado (substituir account-id):
+O script aplica o princípio de menor privilégio, concedendo acesso somente aos três buckets do projeto, ao Glue Data Catalog e aos grupos de log do CloudWatch. Não se recomenda o uso de `AmazonS3FullAccess` em ambientes produtivos.
 
-```
-arn:aws:iam::{ACCOUNT_ID}:role/glue-alfabetizacao-role
-```
-
-### Permissões (least privilege)
-
-- `s3:GetObject`, `s3:PutObject`, `s3:ListBucket` nos 3 buckets medalhão
-- `glue:*` no account (jobs, crawlers, catalog)
-- `logs:CreateLogGroup`, `logs:CreateLogStream`, `logs:PutLogEvents`
-
-Não utilizar `AmazonS3FullAccess` em produção.
-
-## Verificação
+## 8. Verificação
 
 ```bash
 aws s3 ls s3://$BUCKET_BRONZE/bronze/

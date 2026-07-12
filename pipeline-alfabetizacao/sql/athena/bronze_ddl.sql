@@ -43,8 +43,9 @@ TBLPROPERTIES ('parquet.compression'='SNAPPY');
 
 -- =============================================================================
 -- Meta — Brasil
--- Nota: coluna `ano` (avaliacao) coexiste com particao `ano` (ingestao).
--- Preferir crawler-bronze-batch para inferencia; DDL manual apos primeira carga.
+-- Observação: a coluna de avaliação foi nomeada ano_avaliacao para não conflitar
+-- com a partição ano (data de ingestão). Para tabelas com ano de negócio, recomenda-se
+-- o crawler bronze após a primeira carga.
 -- =============================================================================
 CREATE EXTERNAL TABLE IF NOT EXISTS datalake_alfabetizacao.bronze_meta_brasil (
     ano_avaliacao INT,

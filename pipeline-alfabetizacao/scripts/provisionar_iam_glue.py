@@ -1,4 +1,4 @@
-"""Provisiona IAM role e Glue catalog para a Fase 03."""
+"""Provisiona IAM role e Glue Data Catalog da pipeline ICA."""
 
 from __future__ import annotations
 
