@@ -124,6 +124,22 @@ CHECKS: dict[str, dict[str, list[CheckDict]]] = {
             {"tipo": "not_null", "coluna": "taxa_alfabetizacao_calc", "critico": True},
         ],
     },
+    "indicador_alfabetizacao": {
+        "bronze": [
+            {"tipo": "not_null", "coluna": "event_id", "critico": True},
+            {"tipo": "not_null", "coluna": "event_type", "critico": True},
+            {"tipo": "not_null", "coluna": "id_municipio", "critico": True},
+            {"tipo": "regex", "coluna": "id_municipio", "valor": r"^\d{7}$", "critico": True},
+            {"tipo": "min_count", "valor": 1, "critico": True},
+        ],
+        "silver": [
+            {"tipo": "not_null", "coluna": "event_id", "critico": True},
+            {"tipo": "unique", "coluna": "event_id", "critico": True},
+        ],
+        "gold": [
+            {"tipo": "min_count", "valor": 1, "critico": True},
+        ],
+    },
 }
 
 

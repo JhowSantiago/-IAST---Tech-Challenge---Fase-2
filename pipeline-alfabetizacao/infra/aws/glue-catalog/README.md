@@ -25,7 +25,7 @@ Na camada bronze, adota-se a inferência automática de schema por meio de crawl
 | `crawler-bronze-meta_uf` | `s3://{BUCKET_BRONZE}/bronze/batch/meta_uf/` | `meta_uf` |
 | `crawler-bronze-meta_municipio` | `s3://{BUCKET_BRONZE}/bronze/batch/meta_municipio/` | `meta_municipio` |
 | `crawler-bronze-alunos` | `s3://{BUCKET_BRONZE}/bronze/batch/alunos/` | `alunos` |
-| `crawler-bronze-streaming` | `s3://{BUCKET_BRONZE}/bronze/streaming/` | (eventos) |
+| `crawler-bronze-streaming` | `s3://{BUCKET_BRONZE}/bronze/streaming/indicador_alfabetizacao/` | `indicador_alfabetizacao` |
 
 Registro dos crawlers:
 

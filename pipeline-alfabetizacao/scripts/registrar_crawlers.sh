@@ -69,7 +69,7 @@ for entidade in "${ENTIDADES_BATCH[@]}"; do
   create_crawler "crawler-bronze-${entidade}" "s3://${BUCKET_BRONZE}/bronze/batch/${entidade}/"
 done
 
-create_crawler "crawler-bronze-streaming" "s3://${BUCKET_BRONZE}/bronze/streaming/"
+create_crawler "crawler-bronze-streaming" "s3://${BUCKET_BRONZE}/bronze/streaming/indicador_alfabetizacao/"
 
 # Remove crawler legado que inferia tabela única "batch" na raiz batch/
 if aws glue get-crawler --name "crawler-bronze-batch" --region "$REGION" >/dev/null 2>&1; then

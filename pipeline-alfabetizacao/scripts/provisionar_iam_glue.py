@@ -89,7 +89,7 @@ def main() -> None:
         f"crawler-bronze-{entidade}": f"s3://{bronze}/bronze/batch/{entidade}/"
         for entidade in ENTIDADES_BATCH
     }
-    crawlers["crawler-bronze-streaming"] = f"s3://{bronze}/bronze/streaming/"
+    crawlers["crawler-bronze-streaming"] = f"s3://{bronze}/bronze/streaming/indicador_alfabetizacao/"
 
     try:
         glue.delete_crawler(Name=CRAWLER_LEGADO_BATCH)
