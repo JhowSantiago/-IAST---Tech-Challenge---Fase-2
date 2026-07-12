@@ -7,3 +7,4 @@ __pycache__/
 credentials.json
 *.egg-info/
 .pytest_cache/
+tests/validation/samples/*.json
