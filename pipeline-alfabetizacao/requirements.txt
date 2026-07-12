@@ -1,0 +1,6 @@
+basedosdados>=2.0
+pandas>=2.0
+pyspark>=3.3
+kafka-python-ng
+python-dotenv
+requests
