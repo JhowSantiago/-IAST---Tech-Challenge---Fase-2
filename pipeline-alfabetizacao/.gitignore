@@ -9,6 +9,7 @@ credentials.json
 .pytest_cache/
 tests/validation/samples/*.json
 data/staging/
+.kafka/
 
 # Artefatos locais de IDE
 .idea/
