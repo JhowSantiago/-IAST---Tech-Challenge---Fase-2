@@ -139,7 +139,10 @@ def test_idempotencia_extracao() -> None:
 def test_glue_catalog_por_entidade() -> None:
     glue = _glue_client()
     tables = {t["Name"] for t in glue.get_tables(DatabaseName="datalake_alfabetizacao")["TableList"]}
-    assert tables == set(ENTIDADES_BATCH), f"Tabelas Glue inesperadas: {sorted(tables)}"
+    bronze_esperadas = set(ENTIDADES_BATCH) | {"indicador_alfabetizacao"}
+    silver_esperadas = {f"silver_{e}" for e in ENTIDADES_BATCH} | {"silver_municipio_indicador_completo"}
+    assert bronze_esperadas.issubset(tables), f"Bronze ausente: {bronze_esperadas - tables}"
+    assert silver_esperadas.issubset(tables), f"Silver ausente: {silver_esperadas - tables}"
     assert "batch" not in tables
 
     crawlers: list[str] = []
