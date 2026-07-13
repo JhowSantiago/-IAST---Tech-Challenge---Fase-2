@@ -29,19 +29,25 @@ def construir_bronze_streaming_pandas(df: pd.DataFrame) -> pd.DataFrame:
     return resultado
 
 
+PARTITION_COLS = ("ano", "mes", "dia")
+
+
 def salvar_bronze_streaming_s3(
     df: pd.DataFrame,
     bucket_bronze: str,
     s3_client,
 ) -> str:
     destino = f"s3://{bucket_bronze}/bronze/streaming/{ENTIDADE_STREAMING}/"
-    for (ano, mes, dia), grupo in df.groupby(["ano", "mes", "dia"], sort=True):
+    for (ano, mes, dia), grupo in df.groupby(list(PARTITION_COLS), sort=True):
         prefixo = (
             f"bronze/streaming/{ENTIDADE_STREAMING}/ano={ano}/mes={mes}/dia={dia}/"
             f"part-{hash((ano, mes, dia)) % 100000:05d}.parquet"
         )
         buffer = BytesIO()
-        grupo.to_parquet(buffer, index=False, compression="snappy")
+        # Partições só no path S3 — não repetir colunas no Parquet (evita duplicata no Glue)
+        grupo.drop(columns=list(PARTITION_COLS), errors="ignore").to_parquet(
+            buffer, index=False, compression="snappy"
+        )
         buffer.seek(0)
         s3_client.upload_fileobj(buffer, bucket_bronze, prefixo)
     return destino
