@@ -107,7 +107,7 @@ def transformar_alunos(df: pd.DataFrame) -> pd.DataFrame:
         lambda x: "1" if x else "0"
     )
     resultado["peso_aluno"] = pd.to_numeric(resultado.get("peso_aluno"), errors="coerce")
-    resultado = resultado.drop_duplicates(subset=["id_aluno"])
+    resultado = resultado.drop_duplicates(subset=["id_aluno", "ano"])
     colunas = [
         "ano",
         "id_municipio",

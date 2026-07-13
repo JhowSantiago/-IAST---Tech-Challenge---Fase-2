@@ -69,7 +69,7 @@ def transformar_alunos(df: DataFrame) -> DataFrame:
     return (
         df.withColumn("id_municipio", F.lpad(F.col("id_municipio").cast("string"), 7, "0"))
         .withColumn("alfabetizado", F.coalesce(F.col("alfabetizado"), derivado))
-        .dropDuplicates(["id_aluno"])
+        .dropDuplicates(["id_aluno", "ano"])
     )
 
 
