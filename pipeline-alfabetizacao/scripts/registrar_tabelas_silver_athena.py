@@ -189,7 +189,7 @@ def _criar_ou_atualizar(glue, nome: str, bucket: str, spec: dict) -> None:
     except ClientError as exc:
         if exc.response["Error"]["Code"] != "AlreadyExistsException":
             raise
-        glue.update_table(DatabaseName=DATABASE, TableName=nome, TableInput=table_input)
+        glue.update_table(DatabaseName=DATABASE, TableInput=table_input)
         print(f"UPDATE: {nome}")
 
 

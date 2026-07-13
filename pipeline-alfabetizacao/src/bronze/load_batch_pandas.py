@@ -9,6 +9,7 @@ from io import BytesIO
 import pandas as pd
 
 ENTIDADES_TERRITORIAIS = {"uf", "municipio"}
+PARTITION_COLS = ("ano", "mes", "dia")
 JOB_NAME = "etl-bronze-batch"
 
 
@@ -46,7 +47,9 @@ def salvar_bronze_s3(
     for (ano, mes, dia), grupo in df.groupby(["ano", "mes", "dia"], sort=True):
         prefixo = f"bronze/batch/{entidade}/ano={ano}/mes={mes}/dia={dia}/part-00000.parquet"
         buffer = BytesIO()
-        grupo.to_parquet(buffer, index=False, compression="snappy")
+        grupo.drop(columns=list(PARTITION_COLS), errors="ignore").to_parquet(
+            buffer, index=False, compression="snappy"
+        )
         buffer.seek(0)
         s3_client.upload_fileobj(buffer, bucket_bronze, prefixo)
     return destino
