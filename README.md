@@ -291,18 +291,6 @@ O vídeo cobre: problema de negócio, arquitetura híbrida, demonstração Athen
 
 ---
 
-## Materiais de entrega complementares
-
-A plataforma da atividade não permite anexar o repositório diretamente. Além deste README e do código em `pipeline-alfabetizacao/`, a entrega inclui:
-
-| Arquivo | Descrição |
-|---------|-----------|
-| [Entrega_Tech_Challenge_Fase1_Jonathan.pdf](Entrega_Tech_Challenge_Fase1_Jonathan.pdf) | Documento de entrega da Fase 1 (contexto e continuidade do projeto) |
-| [NPS_Strategic_Mitigation.pptx](NPS_Strategic_Mitigation.pptx) | Apresentação executiva da solução |
-| [Tech Challenge — Fase 2]([IAST]%20-%20Tech%20Challenge%20-%20Fase%202.pdf) | Enunciado oficial do desafio |
-
----
-
 ## Documentação complementar
 
 | Documento | Conteúdo |

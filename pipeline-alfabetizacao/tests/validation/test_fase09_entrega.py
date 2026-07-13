@@ -42,8 +42,18 @@ def test_artefatos_entrega_existem() -> None:
     assert (ROOT / "docs" / "git-workflow.md").exists()
     assert (ROOT / "docs" / "arquitetura.md").exists()
     assert (ROOT / "docs" / "finops.md").exists()
-    assert (REPO_ROOT / "Entrega_Tech_Challenge_Fase1_Jonathan.pdf").exists()
-    assert (REPO_ROOT / "NPS_Strategic_Mitigation.pptx").exists()
+
+
+def test_entregaveis_fase1_nao_versionados() -> None:
+    result = subprocess.run(
+        ["git", "ls-files", "Entrega_Tech_Challenge_Fase1_Jonathan.pdf", "NPS_Strategic_Mitigation.pptx"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "", "Arquivos da Fase 1 nao devem estar no repositorio"
 
 
 def test_readme_cobre_14_secoes() -> None:
@@ -60,11 +70,10 @@ def test_readme_referencia_docs_internos() -> None:
     assert "pipeline-alfabetizacao/docs/git-workflow.md" in conteudo
 
 
-def test_readme_referencia_materiais_complementares() -> None:
+def test_readme_nao_referencia_entregaveis_fase1() -> None:
     conteudo = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-    assert "Entrega_Tech_Challenge_Fase1_Jonathan.pdf" in conteudo
-    assert "NPS_Strategic_Mitigation.pptx" in conteudo
-    assert "Materiais de entrega complementares" in conteudo
+    assert "Entrega_Tech_Challenge_Fase1_Jonathan.pdf" not in conteudo
+    assert "NPS_Strategic_Mitigation.pptx" not in conteudo
 
 
 def test_readme_documenta_ia() -> None:
