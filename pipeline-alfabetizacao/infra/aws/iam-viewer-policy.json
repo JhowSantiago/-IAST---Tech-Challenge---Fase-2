@@ -1,0 +1,93 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3ReadMedalhao",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketTagging"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${BUCKET_BRONZE}",
+        "arn:aws:s3:::${BUCKET_BRONZE}/*",
+        "arn:aws:s3:::${BUCKET_SILVER}",
+        "arn:aws:s3:::${BUCKET_SILVER}/*",
+        "arn:aws:s3:::${BUCKET_GOLD}",
+        "arn:aws:s3:::${BUCKET_GOLD}/*"
+      ]
+    },
+    {
+      "Sid": "GlueCatalogRead",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetPartition",
+        "glue:GetPartitions",
+        "glue:BatchGetPartition",
+        "glue:GetCrawler",
+        "glue:GetCrawlers",
+        "glue:GetJob",
+        "glue:GetJobs",
+        "glue:GetJobRun",
+        "glue:GetJobRuns",
+        "glue:GetWorkflow",
+        "glue:ListWorkflows"
+      ],
+      "Resource": [
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:catalog",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:database/${DATABASE_NAME}",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/${DATABASE_NAME}/*",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:crawler/*",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:job/*",
+        "arn:aws:glue:${AWS_REGION}:${AWS_ACCOUNT_ID}:workflow/*"
+      ]
+    },
+    {
+      "Sid": "AthenaQueryRead",
+      "Effect": "Allow",
+      "Action": [
+        "athena:StartQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryResults",
+        "athena:ListQueryExecutions",
+        "athena:ListWorkGroups",
+        "athena:GetWorkGroup",
+        "athena:StopQueryExecution"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogsRead",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents"
+      ],
+      "Resource": "arn:aws:logs:${AWS_REGION}:${AWS_ACCOUNT_ID}:log-group:/aws-glue/*"
+    },
+    {
+      "Sid": "DenyMutations",
+      "Effect": "Deny",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:PutObjectAcl",
+        "glue:Create*",
+        "glue:Update*",
+        "glue:Delete*",
+        "glue:StartCrawler",
+        "glue:StartJobRun",
+        "iam:*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
