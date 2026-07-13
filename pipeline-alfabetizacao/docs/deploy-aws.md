@@ -1,12 +1,12 @@
 # Deploy AWS — Pipeline Glue
 
-Guia para publicar e executar a pipeline na AWS (além dos scripts locais pandas).
+Este documento descreve como a pipeline foi publicada e executada na AWS, complementarmente aos scripts locais em pandas usados no desenvolvimento.
 
-## Pré-requisitos
+## Pré-requisitos utilizados
 
-- `.env` com credenciais admin e buckets configurados
-- Role `glue-alfabetizacao-role` (via `provisionar_iam_glue.py`)
-- Dados em `data/staging/` para carga Bronze via Glue
+- Arquivo `.env` com credenciais administrativas e buckets configurados
+- Role IAM `glue-alfabetizacao-role`, criada por `provisionar_iam_glue.py`
+- Dados em `data/staging/` disponíveis para a carga Bronze via Glue
 
 ## Deploy em um comando
 
@@ -50,26 +50,29 @@ python scripts/executar_pipeline_aws.py --modo completo
 python scripts/executar_pipeline_aws.py --job etl-gold-meta_vs_resultado
 ```
 
-## Usuário viewer (validação da entrega)
+## Usuário viewer para validação da entrega
 
-Usuário IAM **`alfabetizacao-viewer`** — somente leitura:
+Foi criado o usuário IAM **`alfabetizacao-viewer`**, com permissão apenas de leitura:
 
-- S3: `GetObject`, `ListBucket` nos 3 buckets
-- Glue: consulta catálogo e status de jobs
-- Athena: executar queries de leitura
-- **Negado:** `PutObject`, `DeleteObject`, `StartJobRun`, alterações IAM
+- S3: `GetObject` e `ListBucket` nos três buckets
+- Glue: consulta ao catálogo e visualização do status dos jobs
+- Athena: execução de consultas de leitura
+
+Não possui permissão para gravar ou apagar objetos no S3, iniciar jobs Glue nem alterar IAM.
 
 ```powershell
 python scripts/provisionar_usuario_viewer.py
 ```
 
-Credenciais geradas em `.env.viewer` (gitignored). Template: `.env.viewer.example`.
+As credenciais ficam no arquivo local `.env.viewer` (fora do Git). O modelo está em `.env.viewer.example`.
 
-### Validar com o viewer no Athena
+### Consulta no Athena com o viewer
 
-1. Configure o perfil AWS com as credenciais do viewer
-2. Abra Athena → database `datalake_alfabetizacao`
-3. Execute: `SELECT * FROM gold_indicador_municipio LIMIT 10;`
+Com o perfil AWS configurado para o viewer, abra o Athena no database `datalake_alfabetizacao` e execute, por exemplo:
+
+```sql
+SELECT * FROM gold_indicador_municipio LIMIT 10;
+```
 
 ## Alternativa local (Windows)
 

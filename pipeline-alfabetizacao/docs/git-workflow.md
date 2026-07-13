@@ -1,31 +1,34 @@
-# Workflow Git — Tech Challenge Fase 2
+# Versionamento com Git — Tech Challenge Fase 2
 
-Este documento descreve o padrão de versionamento adotado no projeto, conforme requisito RF-09.
+Este documento registra como o versionamento foi conduzido ao longo do desenvolvimento da pipeline, em atendimento ao requisito de histórico Git do Tech Challenge (commits claros, evolução por funcionalidade e integração responsável na branch principal).
 
-## Estratégia de branches
+## Organização do trabalho
 
-Cada fase do roadmap foi desenvolvida em commits atômicos na branch `main`. Para equipes que preferem branches por feature:
+O desenvolvimento acompanhou as etapas da solução (fundação, descoberta de dados, infraestrutura, batch, streaming, Silver, Gold, validação e documentação). Cada etapa gerou um conjunto de commits com escopo delimitado, de modo que o histórico reflita a construção progressiva do pipeline — e não um único commit final com toda a entrega.
 
-| Fase | Branch sugerida | Escopo |
-|------|-----------------|--------|
-| 01 | `feature/01-fundacao` | Estrutura, config, DQ base |
-| 02 | `feature/02-descoberta` | Exploração Base dos Dados |
-| 03 | `feature/03-infra` | S3, IAM, Glue Catalog |
-| 04 | `feature/04-batch` | Extração + Bronze batch |
-| 05 | `feature/05-streaming` | Kafka + Bronze streaming |
-| 06 | `feature/06-silver` | Transformações + integração |
-| 07 | `feature/07-gold` | Agregações analíticas |
-| 08 | `feature/08-validacao` | Validação E2E + FinOps |
-| 09 | `feature/09-entrega` | README, diagrama, docs finais |
+Quando o trabalho foi feito em paralelo com branches, a convenção utilizada foi:
 
-## Regras de commit
+| Etapa | Branch | Conteúdo entregue |
+|-------|--------|-------------------|
+| Fundação | `feature/01-fundacao` | Estrutura do projeto, configuração e base de qualidade de dados |
+| Descoberta | `feature/02-descoberta` | Exploração da Base dos Dados e dicionário |
+| Infraestrutura | `feature/03-infra` | Buckets S3, IAM e catálogo Glue |
+| Batch | `feature/04-batch` | Extração e carga Bronze em lote |
+| Streaming | `feature/05-streaming` | Kafka e ingestão Bronze em streaming |
+| Silver | `feature/06-silver` | Limpeza, validações e integração |
+| Gold | `feature/07-gold` | Visões analíticas e consultas Athena |
+| Validação | `feature/08-validacao` | Testes end-to-end e documentação FinOps |
+| Entrega | `feature/09-entrega` | README, diagrama e documentação final |
 
-- **Um commit por tarefa lógica** do plano de fase
-- Mensagens em **português**, prefixo convencional: `feat`, `fix`, `docs`, `test`, `chore`
-- Formato: `tipo(escopo): descrição curta do porquê`
-- Nunca commitar `.env`, `.env.viewer` ou credenciais
+Parte do histórico também foi consolidada diretamente em `main` com commits atômicos, mantendo a mesma disciplina de mensagens e escopo.
 
-### Exemplos do histórico deste projeto
+## Commits
+
+As mensagens foram escritas em português, com um prefixo que indica o tipo de alteração (`feat`, `fix`, `docs`, `test`, `chore`) e um escopo curto. O objetivo é deixar evidente, no `git log`, o que mudou e por quê — por exemplo, se a alteração implementou uma camada, corrigiu um bug de qualidade de dados ou apenas atualizou documentação.
+
+Arquivos com segredo (`.env`, `.env.viewer` e credenciais) ficaram fora do repositório; apenas templates de exemplo (`.env.example`, `.env.viewer.example`) foram versionados.
+
+Exemplos retirados do histórico real do projeto:
 
 ```
 feat(07-01): implementa camada Gold com visoes analiticas e scripts Athena
@@ -35,35 +38,38 @@ docs(finops): documenta otimizacoes e estimativa de custos
 feat(aws): publica jobs Glue na AWS e usuario viewer somente leitura
 ```
 
+O repositório acumula mais de 25 commits nessa linha, o que permite acompanhar a evolução da Bronze até a Gold e o deploy na AWS.
+
 ## Pull Requests
 
-Cada PR deve conter:
+Nas integrações via Pull Request, a descrição adotada segue três blocos: o que mudou, a motivação em relação aos requisitos do desafio, e como validar (scripts de teste e/ou consultas no Athena). Essa estrutura facilita a revisão — inclusive pelo avaliador — sem depender de contexto externo ao GitHub.
+
+Exemplo do formato utilizado:
 
 ```markdown
 ## O que mudou
-- Lista objetiva das alterações
+- Job Glue de carga Bronze para as entidades batch
 
 ## Por que
-- Justificativa em relação ao requisito do Tech Challenge
+- Atender à ingestão histórica exigida no Tech Challenge
 
 ## Como testar
-- Comandos de validação (ex.: validar_pipeline.py, pytest)
-- Queries Athena de verificação
+- Executar validar_pipeline.py
+- No Athena: SELECT COUNT(*) FROM bronze_municipio
 ```
 
-## Verificar histórico
+## Consulta do histórico
 
 ```bash
 git log --oneline
-# Projeto com 25+ commits atômicos em português
 ```
 
-## Usuário viewer (validação)
+## Acesso somente leitura para validação
 
-Para permitir que avaliadores consultem dados sem permissão de escrita:
+Para que o avaliador consulte buckets, catálogo Glue e Athena sem permissão de escrita, foi provisionado o usuário IAM `alfabetizacao-viewer`. O script responsável é:
 
 ```powershell
 python scripts/provisionar_usuario_viewer.py
 ```
 
-Credenciais geradas localmente em `.env.viewer` (não versionado).
+As credenciais ficam apenas no arquivo local `.env.viewer` (não versionado), a partir do template `.env.viewer.example`.

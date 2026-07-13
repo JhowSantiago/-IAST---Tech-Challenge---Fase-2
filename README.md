@@ -252,8 +252,9 @@ Documentação de deploy: [deploy-aws.md](pipeline-alfabetizacao/docs/deploy-aws
 ```powershell
 cd pipeline-alfabetizacao
 python scripts/provisionar_usuario_viewer.py
-# Credenciais em .env.viewer (não versionado)
 ```
+
+As credenciais do usuário viewer são gravadas apenas em `.env.viewer`, fora do controle de versão.
 
 ---
 
@@ -285,9 +286,9 @@ Inclui testes por fase (04–09) e validação AWS Glue quando credenciais estã
 |--------|-------|
 | Jonathan Relva | Desenvolvimento completo da pipeline, documentação e deploy |
 
-**Vídeo executivo (≤ 5 min):** _link a ser adicionado após gravação_
+**Vídeo executivo (até 5 minutos):** [inserir URL após a publicação]
 
-O vídeo aborda: problema de negócio; arquitetura da solução; valor da pipeline para análises educacionais; potencial uso para inteligência artificial.
+No vídeo apresento o problema de negócio, a arquitetura da solução, o valor da pipeline para análises educacionais e o potencial de uso em inteligência artificial.
 
 ---
 
@@ -299,7 +300,7 @@ O vídeo aborda: problema de negócio; arquitetura da solução; valor da pipeli
 | [FinOps](pipeline-alfabetizacao/docs/finops.md) | Otimizações e estimativa de custos |
 | [Deploy AWS](pipeline-alfabetizacao/docs/deploy-aws.md) | Jobs Glue e execução na nuvem |
 | [Decisões arquiteturais](pipeline-alfabetizacao/docs/decisoes-arquiteturais.md) | Trade-offs documentados |
-| [Git workflow](pipeline-alfabetizacao/docs/git-workflow.md) | Branches, commits e PRs |
+| [Git workflow](pipeline-alfabetizacao/docs/git-workflow.md) | Versionamento, branches e Pull Requests |
 | [Regras de qualidade](pipeline-alfabetizacao/docs/regras-qualidade.md) | Regras DQ da Silver |
 
 ---

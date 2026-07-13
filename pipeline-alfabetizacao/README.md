@@ -1,8 +1,8 @@
 # Pipeline Indicador Criança Alfabetizada
 
-> A documentação principal do projeto está no **[README da raiz do repositório](../README.md)** — é o que o GitHub exibe na página inicial.
+A documentação completa da solução está no **[README da raiz](../README.md)**, que é a página exibida pelo GitHub ao abrir o repositório.
 
-Este diretório contém o código-fonte, scripts, testes e documentação técnica detalhada da pipeline.
+Este diretório concentra o código-fonte, os scripts, os testes e a documentação técnica detalhada da pipeline.
 
 ## Início rápido
 
