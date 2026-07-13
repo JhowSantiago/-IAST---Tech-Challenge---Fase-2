@@ -1,0 +1,72 @@
+{
+  "Name": "wf-alfabetizacao-batch",
+  "Description": "Orquestra pipeline batch bronze → silver → gold (Tech Challenge Fase 2)",
+  "DefaultRunProperties": {
+    "BUCKET_BRONZE": "${BUCKET_BRONZE}",
+    "BUCKET_SILVER": "${BUCKET_SILVER}",
+    "BUCKET_GOLD": "${BUCKET_GOLD}"
+  },
+  "Triggers": [
+    {
+      "Name": "trigger-wf-alfabetizacao-on-demand",
+      "Type": "ON_DEMAND",
+      "Actions": [
+        {
+          "JobName": "etl-bronze-batch-uf",
+          "Arguments": {
+            "--ENTIDADE": "uf"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "trigger-wf-alfabetizacao-schedule",
+      "Type": "SCHEDULED",
+      "Schedule": "cron(0 6 * * ? *)",
+      "Actions": [
+        {
+          "JobName": "etl-bronze-batch-uf"
+        }
+      ]
+    }
+  ],
+  "Jobs": {
+    "bronze": [
+      "etl-bronze-batch-uf",
+      "etl-bronze-batch-municipio",
+      "etl-bronze-batch-meta_brasil",
+      "etl-bronze-batch-meta_uf",
+      "etl-bronze-batch-meta_municipio",
+      "etl-bronze-batch-alunos"
+    ],
+    "silver": [
+      "etl-silver-uf",
+      "etl-silver-municipio",
+      "etl-silver-meta_brasil",
+      "etl-silver-meta_uf",
+      "etl-silver-meta_municipio",
+      "etl-silver-alunos",
+      "etl-silver-integracao"
+    ],
+    "gold": [
+      "etl-gold-indicador_municipio",
+      "etl-gold-meta_vs_resultado",
+      "etl-gold-evolucao_temporal"
+    ]
+  },
+  "ExecutionOrder": [
+    "bronze (paralelo por entidade)",
+    "silver (sequencial: territorial → metas → alunos → integração)",
+    "gold (paralelo por visão)"
+  ],
+  "LocalAlternative": {
+    "script": "scripts/executar_pipeline_batch.ps1",
+    "commands": [
+      "python scripts/carregar_bronze_batch.py --todas",
+      "python scripts/carregar_silver.py --todas",
+      "python scripts/carregar_gold.py --todas",
+      "python scripts/registrar_tabelas_gold_athena.py"
+    ],
+    "note": "No ambiente local Windows, usar scripts pandas em sequência em vez do Glue Workflow."
+  }
+}

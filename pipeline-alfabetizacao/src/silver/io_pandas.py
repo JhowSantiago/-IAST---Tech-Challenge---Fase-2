@@ -29,6 +29,9 @@ COLUNAS_STRING_EXPORT = {
         "_source_type",
         "sigla_uf_municipio",
     ],
+    "indicador_municipio": ["nome", "sigla_uf", "nome_uf", "rede", "id_municipio", "nivel_alfabetizacao"],
+    "meta_vs_resultado": ["sigla_uf", "regiao", "nome_uf"],
+    "evolucao_temporal": ["nome", "sigla_uf", "nome_uf", "rede", "id_municipio"],
 }
 
 
