@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from pyspark.sql import functions as F
 
-ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+from src.glue_bootstrap import setup_glue_path
+
+setup_glue_path()
 
 from src.silver.load_silver import adicionar_silver_timestamp, salvar_quarentena, salvar_silver  # noqa: E402
 

@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 
-ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+from src.glue_bootstrap import setup_glue_path
+
+setup_glue_path()
 
 from src.dq.checks import checar_qualidade, get_checks  # noqa: E402
 from src.silver.load_silver import adicionar_silver_timestamp, salvar_silver  # noqa: E402

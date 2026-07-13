@@ -4,16 +4,15 @@ from __future__ import annotations
 
 import sys
 from datetime import datetime, timezone
-from pathlib import Path
 
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from pyspark.sql import functions as F
 
-ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+from src.glue_bootstrap import setup_glue_path
+
+setup_glue_path()
 
 from src.gold.agregacoes import AGREGACOES, VISOES_GOLD  # noqa: E402
 
@@ -42,7 +41,7 @@ def main() -> None:
         gold_df.withColumn("mes", F.lpad(F.month(F.current_timestamp()).cast("string"), 2, "0"))
         .withColumn("dia", F.lpad(F.dayofmonth(F.current_timestamp()).cast("string"), 2, "0"))
         .write.mode("overwrite")
-        .partitionBy("ano", "mes", "dia")
+        .partitionBy("mes", "dia")
         .parquet(destino)
     )
     print(f"Gold {visao}: {gold_df.count()} registros em {destino}")
