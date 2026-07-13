@@ -48,6 +48,8 @@ def transformar_meta_municipio(df: DataFrame, municipios: DataFrame | None = Non
         .drop("meta_vigente")
         .dropDuplicates(["id_municipio", "ano", "rede"])
     )
+    if "nivel_alfabetizacao" in resultado.columns:
+        resultado = resultado.withColumn("nivel_alfabetizacao", F.col("nivel_alfabetizacao").cast("string"))
     return resultado
 
 

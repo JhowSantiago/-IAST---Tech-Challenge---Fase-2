@@ -83,6 +83,8 @@ def transformar_meta_municipio(
     elif "sigla_uf" in resultado.columns:
         resultado["sigla_uf"] = resultado["sigla_uf"].astype(str).str.strip().str.upper()
     resultado = resultado.drop_duplicates(subset=["id_municipio", "ano", "rede"])
+    if "nivel_alfabetizacao" in resultado.columns:
+        resultado["nivel_alfabetizacao"] = resultado["nivel_alfabetizacao"].astype("string")
     resultado = _calcular_gap_meta(resultado)
     if "meta_vigente" in resultado.columns:
         resultado = resultado.drop(columns=["meta_vigente"])

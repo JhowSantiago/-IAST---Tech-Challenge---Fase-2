@@ -16,6 +16,30 @@ from src.dq.checks import get_checks
 PARTITION_COLS_TERRITORIAL = ("ano", "mes", "dia")
 PARTITION_COLS_PADRAO = ("mes", "dia")
 
+COLUNAS_STRING_EXPORT = {
+    "meta_municipio": ["nivel_alfabetizacao", "rede", "id_municipio", "sigla_uf"],
+    "municipio_indicador_completo": [
+        "nivel_alfabetizacao",
+        "rede",
+        "id_municipio",
+        "sigla_uf",
+        "nome_municipio",
+        "nome_uf",
+        "event_id",
+        "_source_type",
+        "sigla_uf_municipio",
+    ],
+}
+
+
+def normalizar_tipos_exportacao(df: pd.DataFrame, entidade: str) -> pd.DataFrame:
+    """Garante tipos compatíveis com o schema Glue/Athena antes de gravar Parquet."""
+    resultado = df.copy()
+    for coluna in COLUNAS_STRING_EXPORT.get(entidade, []):
+        if coluna in resultado.columns:
+            resultado[coluna] = resultado[coluna].astype("string")
+    return resultado
+
 
 def particoes_entidade(entidade: str) -> tuple[str, ...]:
     if entidade in {"uf", "municipio"}:
@@ -132,6 +156,7 @@ def salvar_parquet_particionado(
     part_cols = particoes_entidade(entidade)
     destino = f"s3://{bucket}/{prefixo_base}"
     df = adicionar_particoes_ingestao(df, entidade)
+    df = normalizar_tipos_exportacao(df, entidade)
     for chaves, grupo in df.groupby(list(part_cols), sort=True):
         if not isinstance(chaves, tuple):
             chaves = (chaves,)
