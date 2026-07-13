@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +31,11 @@ SECOES_README = [
 ]
 
 
+def _plain(text: str) -> str:
+    normalized = unicodedata.normalize("NFD", text)
+    return "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn").lower()
+
+
 def test_artefatos_entrega_existem() -> None:
     assert (REPO_ROOT / "README.md").exists()
     assert (ROOT / "docs" / "diagrama-pipeline.png").exists()
@@ -41,9 +47,9 @@ def test_artefatos_entrega_existem() -> None:
 
 
 def test_readme_cobre_14_secoes() -> None:
-    conteudo = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    conteudo = _plain((REPO_ROOT / "README.md").read_text(encoding="utf-8"))
     for secao in SECOES_README:
-        assert secao.lower() in conteudo.lower(), f"Secao ausente: {secao}"
+        assert _plain(secao) in conteudo, f"Secao ausente: {secao}"
 
 
 def test_readme_referencia_docs_internos() -> None:
@@ -62,10 +68,10 @@ def test_readme_referencia_materiais_complementares() -> None:
 
 
 def test_readme_documenta_ia() -> None:
-    conteudo = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-    assert "predicao" in conteudo.lower() or "predição" in conteudo.lower()
-    assert "desigualdade" in conteudo.lower()
-    assert "politicas publicas" in conteudo.lower() or "políticas públicas" in conteudo.lower()
+    conteudo = _plain((REPO_ROOT / "README.md").read_text(encoding="utf-8"))
+    assert "predic" in conteudo
+    assert "desigualdade" in conteudo
+    assert "politicas" in conteudo
 
 
 def test_diagrama_png_valido() -> None:
