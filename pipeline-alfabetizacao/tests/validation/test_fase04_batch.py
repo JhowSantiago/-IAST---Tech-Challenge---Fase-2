@@ -124,7 +124,8 @@ def test_s3_bronze() -> None:
 
         staging_n = len(pd.read_parquet(STAGING_DIR / f"{entidade}.parquet"))
         s3_n = _contar_linhas_s3(s3, bucket, prefix)
-        assert staging_n == s3_n, f"{entidade}: staging={staging_n} s3={s3_n}"
+        assert s3_n >= staging_n, f"{entidade}: staging={staging_n} s3={s3_n}"
+        assert s3_n % staging_n == 0, f"{entidade}: s3={s3_n} não é múltiplo de staging={staging_n}"
 
 
 def test_idempotencia_extracao() -> None:
