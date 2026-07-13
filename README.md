@@ -287,7 +287,7 @@ Inclui testes por fase (04–09) e validação AWS Glue quando credenciais estã
 
 **Vídeo executivo (≤ 5 min):** _link a ser adicionado após gravação_
 
-O vídeo cobre: problema de negócio, arquitetura híbrida, demonstração Athena, valor analítico, aplicação em IA e FinOps.
+O vídeo aborda: problema de negócio; arquitetura da solução; valor da pipeline para análises educacionais; potencial uso para inteligência artificial.
 
 ---
 
