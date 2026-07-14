@@ -286,7 +286,9 @@ Inclui testes por fase (04–09) e validação AWS Glue quando credenciais estã
 |--------|-------|
 | Jonathan Relva | Desenvolvimento completo da pipeline, documentação e deploy |
 
-**Vídeo executivo (até 5 minutos):** [inserir URL após a publicação]
+**Vídeo executivo (até 5 minutos):** [Pipeline-Hibrido-para-Analise-da-Alfabetizacao.mp4](Pipeline-Hibrido-para-Analise-da-Alfabetizacao.mp4)
+
+**Slides da apresentação:** [Pipeline-Hibrido-para-Analise-da-Alfabetizacao.pptx](Pipeline-Hibrido-para-Analise-da-Alfabetizacao.pptx)
 
 No vídeo apresento o problema de negócio, a arquitetura da solução, o valor da pipeline para análises educacionais e o potencial de uso em inteligência artificial.
 
